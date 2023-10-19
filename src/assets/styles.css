@@ -1,15 +1,51 @@
-form {
-  align-items: center;
+body{
+  margin: 0;
+  padding: 0;
   display: flex;
+  overflow: hidden; /* Para esconder barras de rolagem verticais */
+}
+form {
+  display: flex;
+  width: 100%;
   flex-direction: column;
-  justify-content: center;
+}
+input[type="file"] {
+  display: none;
 }
 .upload-button {
-  background-color: #4caf50;
+  justify-content: center;
+  background-color: #40AC6B;
+  color: #fff;
+  width: auto;
   border: none;
-  color: white;
-  padding: 15px 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.upload-button p{
+  align-items: center;
+  font-size: 13px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  align-items: center;
+  font-family: Helvetica,Arial,sans-serif;
   text-align: center;
+}
+#submit{
+  display: none;
+}
+a{
   text-decoration: none;
-  display: inline-block;
+  font-family: Helvetica,Arial,sans-serif;
+  background-color: #40AC6B;
+  height: 20px;
+  color: #fff;
+  margin-left: 10px;
+  border-radius: 8px;
+  padding: 4px;
+}
+strong{
+  font-family: Helvetica,Arial,sans-serif;
+  font-size: 13px;
+  color: #40AC6B;
 }

@@ -13,6 +13,12 @@ export default function getHtml(body: string) {
     <body>
       ${body}
     </body>
+    <script>
+      function enviarFormulario() {
+        var submit = document.getElementById('submit');
+        submit.click();
+      }
+    </script>
   </html>
 `;
 }

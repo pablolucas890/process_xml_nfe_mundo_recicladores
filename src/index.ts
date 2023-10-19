@@ -40,14 +40,15 @@ async function bootstrap() {
 
   app.get('/:idVendedor', async (request: FastifyRequest, reply) => {
     const { idVendedor } = request.params as { idVendedor: string };
-    const storyset = fs.readFileSync('src/assets/storyset.svg', 'utf8');
     return reply.type('text/html').send(
       getHtml(`
-      <form action="/upload" method="post" enctype="multipart/form-data">
-        ${storyset}
-        <input type="file" name="file" accept="text/xml" class="upload-button">
-        <input type="hidden" name="idVendedor" value="${idVendedor}">
-        <input type="submit" value="Enviar">
+      <form action="/upload" method="post" id="form" enctype="multipart/form-data">
+        <label class="upload-button">
+          <input type="hidden" name="idVendedor" value="${idVendedor}">
+          <input type="file" onchange="enviarFormulario()" name="file" accept="text/xml">
+          <p>Enviar XML</p>
+        </label>
+        <input type="submit" value="Enviar" id="submit">
       </form>
     `),
     );
@@ -57,8 +58,8 @@ async function bootstrap() {
     const { idVendedor, errorID } = request.params as { idVendedor: string; errorID: keyof typeof errors };
     return reply.type('text/html').send(
       getHtml(`
-      <h3>${errors[errorID]}</h3>
-      <a href="/${idVendedor}">Voltar</a>
+      <strong>${errors[errorID]}</strong>
+      <a href="/${idVendedor}">OK</a>
     `),
     );
   });
@@ -67,8 +68,8 @@ async function bootstrap() {
     const { idVendedor } = request.params as { idVendedor: string };
     return reply.type('text/html').send(
       getHtml(`
-      <h3>Arquivo processado com sucesso</h3>
-      <a href="/${idVendedor}">Voltar</a>
+      <strong>Arquivo processado com sucesso</strong>
+      <a href="/${idVendedor}">OK</a>
     `),
     );
   });
@@ -80,7 +81,6 @@ async function bootstrap() {
     handler: async (request: FastifyRequest, reply) => {
       const xmlFile = (request as MulterRequest).file;
       const { idVendedor } = request.body as { idVendedor: string };
-
       try {
         if (!(xmlFile && xmlFile.mimetype === 'text/xml')) {
           console.error('Tipo do arquivo:', xmlFile);
