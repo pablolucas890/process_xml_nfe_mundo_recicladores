@@ -3,10 +3,8 @@
 // console.log('Salt:', salt);
 // console.log('Hash:', hash);
 
-import fastifyBasicAuth from '@fastify/basic-auth';
 import cors from '@fastify/cors';
-import * as crypto from 'crypto';
-import fastify, { FastifyReply, FastifyRequest, RouteGenericInterface } from 'fastify';
+import fastify, { FastifyRequest, RouteGenericInterface } from 'fastify';
 import multer from 'fastify-multer';
 import fs from 'fs';
 import { parseString } from 'xml2js';
@@ -32,34 +30,15 @@ function getMaterial(product: string) {
   );
 }
 
-// validate
-async function validate(username: string, password: string, req: FastifyRequest, reply: FastifyReply) {
-  const users = JSON.parse(fs.readFileSync('src/credentials/users.json', 'utf8'));
-
-  const user = users.find((user: { username: string }) => user.username === username);
-
-  if (!user) {
-    reply.code(401).send(new Error('Credenciais inválidas'));
-  }
-
-  const hash = crypto.pbkdf2Sync(password, user.salt, 1000, 64, 'sha512').toString('hex');
-
-  if (hash !== user.passwordHash) {
-    reply.code(401).send(new Error('Credenciais inválidas'));
-  }
-}
-
 // begin of app
 async function bootstrap() {
   const app = fastify({ logger: false });
-
-  await app.register(fastifyBasicAuth, { validate });
 
   await app.register(cors, { origin: true });
 
   await app.register(multer.contentParser);
 
-  app.get('/:idVendedor', { preValidation: app.basicAuth }, async (request: FastifyRequest, reply) => {
+  app.get('/:idVendedor', async (request: FastifyRequest, reply) => {
     const { idVendedor } = request.params as { idVendedor: string };
     const storyset = fs.readFileSync('src/assets/storyset.svg', 'utf8');
     return reply.type('text/html').send(
@@ -74,7 +53,7 @@ async function bootstrap() {
     );
   });
 
-  app.get('/error/:idVendedor/:errorID', { preValidation: app.basicAuth }, async (request, reply) => {
+  app.get('/error/:idVendedor/:errorID', async (request, reply) => {
     const { idVendedor, errorID } = request.params as { idVendedor: string; errorID: keyof typeof errors };
     return reply.type('text/html').send(
       getHtml(`
@@ -84,7 +63,7 @@ async function bootstrap() {
     );
   });
 
-  app.get('/success/:idVendedor', { preValidation: app.basicAuth }, async (request, reply) => {
+  app.get('/success/:idVendedor', async (request, reply) => {
     const { idVendedor } = request.params as { idVendedor: string };
     return reply.type('text/html').send(
       getHtml(`
@@ -97,7 +76,6 @@ async function bootstrap() {
   app.route<RouteGenericInterface, FastifyRequest>({
     method: 'POST',
     url: '/upload',
-    preValidation: app.basicAuth,
     preHandler: upload.single('file'),
     handler: async (request: FastifyRequest, reply) => {
       const xmlFile = (request as MulterRequest).file;
@@ -163,7 +141,7 @@ async function bootstrap() {
     },
   });
 
-  app.get('/uploads/:filename', { preValidation: app.basicAuth }, async (request, reply) => {
+  app.get('/uploads/:filename', async (request, reply) => {
     const { filename } = request.params as { filename: string };
     const file = fs.readFileSync('uploads/' + filename);
     return reply.type('document/xml').send(file);
