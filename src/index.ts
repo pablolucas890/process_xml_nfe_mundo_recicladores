@@ -15,9 +15,13 @@ import { MulterRequest } from './types';
 import errors from './utils/errors';
 import materials from './utils/materials';
 
-const PROTOCOL = 'http';
+const PROTOCOL = 'https';
 const PORT = 4444;
 const HOST = '0.0.0.0';
+
+const privateKey = fs.readFileSync('src/credentials/private.key', 'utf8');
+const certificate = fs.readFileSync('src/credentials/certificate.crt', 'utf8');
+const caBundle = fs.readFileSync('src/credentials/ca-bundle.crt', 'utf8');
 
 // utils
 function getBrasilianDate(date: string) {
@@ -32,7 +36,12 @@ function getMaterial(product: string) {
 
 // begin of app
 async function bootstrap() {
-  const app = fastify({ logger: false });
+  const app = fastify({ logger: false,
+    https: {
+    key: privateKey,
+    cert: certificate,
+    ca: caBundle
+  } });
 
   await app.register(cors, { origin: true });
 
