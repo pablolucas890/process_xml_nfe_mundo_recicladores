@@ -18,6 +18,7 @@ import materials from './utils/materials';
 const PROTOCOL = 'https';
 const PORT = 4444;
 const HOST = '0.0.0.0';
+const DNS = 'xml.mundorecicladores.com.br';
 
 const privateKey = fs.readFileSync('src/credentials/private.key', 'utf8');
 const certificate = fs.readFileSync('src/credentials/certificate.crt', 'utf8');
@@ -114,7 +115,7 @@ async function bootstrap() {
             const codigoNota = nfeProc.nfe.infNFe.Id;
             const situacaoNota = 'em-analise';
             const notaNomeArquivo = xmlFile.originalname;
-            const notaUrl = PROTOCOL + '%3A%2F%2F' + HOST + ':' + PORT + '%2F' + xmlFile.path.replace('/', '%2F');
+            const notaUrl = PROTOCOL + '%3A%2F%2F' + DNS + ':' + PORT + '%2F' + xmlFile.path.replace('/', '%2F');
             const vendedorId = idVendedor;
             const codigoBarras = nfeProc.protNFe.infProt.chNFe;
             const dataEmissao = getBrasilianDate(nfeProc.protNFe.infProt.dhRecbto);
