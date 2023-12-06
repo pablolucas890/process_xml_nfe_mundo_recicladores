@@ -12,8 +12,8 @@ import upload from './config/multer';
 import getHtml from './lib/getHtml';
 import getnfeProc from './lib/getnfeProc';
 import { MulterRequest } from './types';
-import errors from './utils/errors';
 import materials from './utils/materials';
+import replyMessages from './utils/replyMessages';
 
 const PROTOCOL = 'https';
 const PORT = 4444;
@@ -55,7 +55,7 @@ async function bootstrap() {
       <form action="/upload" method="post" id="form" enctype="multipart/form-data">
         <label class="upload-button">
           <input type="hidden" name="idVendedor" value="${idVendedor}">
-          <input type="file" onchange="enviarFormulario()" name="file" accept="text/xml">
+          <input type="file" onchange="enviarFormulario()" name="files" accept="text/xml" multiple>
           <p>Enviar XML</p>
         </label>
         <input type="submit" value="Enviar" id="submit">
@@ -64,21 +64,21 @@ async function bootstrap() {
     );
   });
 
-  app.get('/error/:idVendedor/:errorID', async (request, reply) => {
-    const { idVendedor, errorID } = request.params as { idVendedor: string; errorID: keyof typeof errors };
+  app.get('/result/:idVendedor/:message', async (request, reply) => {
+    const { idVendedor, message } = request.params as { idVendedor: string; message: string };
+    const text = message
+      .replace(/_1_/g, '.xml:  ' + replyMessages[1])
+      .replace(/_2_/g, '.xml:  ' + replyMessages[2])
+      .replace(/_3_/g, '.xml:  ' + replyMessages[3])
+      .replace(/_4_/g, '.xml:  ' + replyMessages[4])
+      .replace(/_5_/g, '.xml:  ' + replyMessages[5])
+      .replace(/_6_/g, '.xml:  ' + replyMessages[6])
+      .replace(/_7_/g, '.xml:  ' + replyMessages[7])
+      .replace(/_8_/g, '.xml:  ' + replyMessages[8])
+      .replace(/_9_/g, replyMessages[9]);
     return reply.type('text/html').send(
       getHtml(`
-      <strong>${errors[errorID]}</strong>
-      <a href="/${idVendedor}">OK</a>
-    `),
-    );
-  });
-
-  app.get('/success/:idVendedor', async (request, reply) => {
-    const { idVendedor } = request.params as { idVendedor: string };
-    return reply.type('text/html').send(
-      getHtml(`
-      <strong>Arquivo processado com sucesso</strong>
+      <strong>${text}</strong>
       <a href="/${idVendedor}">OK</a>
     `),
     );
@@ -87,67 +87,69 @@ async function bootstrap() {
   app.route<RouteGenericInterface, FastifyRequest>({
     method: 'POST',
     url: '/upload',
-    preHandler: upload.single('file'),
-    handler: async (request: FastifyRequest, reply) => {
-      const xmlFile = (request as MulterRequest).file;
+    preHandler: upload.array('files', 10),
+    errorHandler: (error, request, reply) => {
       const { idVendedor } = request.body as { idVendedor: string };
-      try {
-        if (!(xmlFile && xmlFile.mimetype === 'text/xml')) {
-          console.error('Tipo do arquivo:', xmlFile);
-          return reply.redirect('/error/' + idVendedor + '/4');
-        }
-        const xmlData = fs.readFileSync(xmlFile.path, 'utf8');
-
-        await new Promise(() => {
-          parseString(xmlData, async (err, result) => {
-            if (err) {
-              console.error(err);
-              return reply.redirect('/error/' + idVendedor + '/1');
-            }
-
-            const nfeProc = getnfeProc(result);
-            if (!nfeProc.nfe.infNFe.det?.length || nfeProc.nfe.infNFe.det?.length !== 1) {
-              console.error(nfeProc.nfe.infNFe.det);
-              return reply.redirect('/error/' + idVendedor + '/3');
-            }
-
-            const det = nfeProc.nfe.infNFe.det[0];
-            const codigoNota = nfeProc.nfe.infNFe.Id;
-            const situacaoNota = 'em-analise';
-            const notaNomeArquivo = xmlFile.originalname;
-            const notaUrl = PROTOCOL + '%3A%2F%2F' + DNS + ':' + PORT + '%2F' + xmlFile.path.replace('/', '%2F');
-            const vendedorId = idVendedor;
-            const codigoBarras = nfeProc.protNFe.infProt.chNFe;
-            const dataEmissao = getBrasilianDate(nfeProc.protNFe.infProt.dhRecbto);
-            const tipoMaterial = getMaterial(det.prod.xProd.toLowerCase());
-            const valorUnitario = parseFloat(det.prod.vUnCom);
-            const valorTotal = parseFloat(det.prod.vProd);
-            const quantidade = det.prod.uCom == 'KG' ? parseFloat(det.prod.qCom) * 1000 : 0;
-
-            if (quantidade === 0) {
-              console.error(det.prod.uCom);
-              return reply.redirect('/error/' + idVendedor + '/2');
-            }
-
-            const url = `https://www.app.mundorecicladores.com.br/newRouter3/${codigoNota}/${situacaoNota}/${notaNomeArquivo}/${notaUrl}/${vendedorId}/${codigoBarras}/${dataEmissao}/${tipoMaterial}/${valorUnitario}/${valorTotal}/${quantidade}`;
-
-            const res = await fetch(url).catch(err => {
-              console.error(err);
-              return reply.redirect('/error/' + idVendedor + '/6');
+      reply.redirect('/result/' + idVendedor + '/_9_');
+    },
+    handler: async (request: FastifyRequest, reply) => {
+      const files = (request as MulterRequest).files as Express.Multer.File[];
+      const { idVendedor } = request.body as { idVendedor: string };
+      let messages = '';
+      for (const xmlFile of files) {
+        try {
+          if (!(xmlFile && xmlFile.mimetype === 'text/xml')) {
+            messages += xmlFile.filename.substring(0, 5) + '_4_';
+          } else {
+            const xmlData = fs.readFileSync(xmlFile.path, 'utf8');
+            let url = '';
+            parseString(xmlData, async (err, result) => {
+              if (err) {
+                messages += xmlFile.filename.substring(0, 5) + '_1_';
+              } else {
+                const nfeProc = getnfeProc(result);
+                if (!nfeProc || !nfeProc.nfe.infNFe.det?.length || nfeProc.nfe.infNFe.det?.length !== 1) {
+                  messages += xmlFile.filename.substring(0, 5) + '_3_';
+                } else {
+                  const det = nfeProc.nfe.infNFe.det[0];
+                  const codigoNota = nfeProc.nfe.infNFe.Id;
+                  const situacaoNota = 'em-analise';
+                  const notaNomeArquivo = xmlFile.originalname;
+                  const notaUrl = PROTOCOL + '%3A%2F%2F' + DNS + ':' + PORT + '%2F' + xmlFile.path.replace('/', '%2F');
+                  const vendedorId = idVendedor;
+                  const codigoBarras = nfeProc.protNFe.infProt.chNFe;
+                  const dataEmissao = getBrasilianDate(nfeProc.protNFe.infProt.dhRecbto);
+                  const tipoMaterial = getMaterial(det.prod.xProd.toLowerCase());
+                  const valorUnitario = parseFloat(det.prod.vUnCom);
+                  const valorTotal = parseFloat(det.prod.vProd);
+                  const quantidade = det.prod.uCom == 'KG' ? parseFloat(det.prod.qCom) * 1000 : 0;
+                  if (quantidade === 0) {
+                    messages += xmlFile.filename.substring(0, 5) + '_2_';
+                  } else {
+                    url = `https://www.app.mundorecicladores.com.br/newRouter3/${codigoNota}/${situacaoNota}/${notaNomeArquivo}/${notaUrl}/${vendedorId}/${codigoBarras}/${dataEmissao}/${tipoMaterial}/${valorUnitario}/${valorTotal}/${quantidade}`;
+                  }
+                }
+              }
             });
-            const text = await res.text();
-            if (text.includes('Page not found')) {
-              console.error('Page not found');
-              return reply.redirect('/error/' + idVendedor + '/7');
-            } else {
-              return reply.redirect('/success/' + idVendedor);
+            if (url) {
+              const res = await fetch(url).catch(() => {
+                messages += xmlFile.filename.substring(0, 5) + '_6_';
+              });
+              if (res) {
+                const text = await res.text();
+                if (text.includes('Page not found')) {
+                  messages += xmlFile.filename.substring(0, 5) + '_7_';
+                } else {
+                  messages += xmlFile.filename.substring(0, 5) + '_8_';
+                }
+              }
             }
-          });
-        });
-      } catch (error) {
-        console.error(error);
-        return reply.redirect('/error/' + idVendedor + '/5');
+          }
+        } catch (error) {
+          messages += '_5_';
+        }
       }
+      return reply.redirect('/result/' + idVendedor + '/' + messages);
     },
   });
 

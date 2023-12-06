@@ -2,7 +2,8 @@ import { ICMSTot, dest, det, emit, infNFe, infProt, nfe, prod, total } from '../
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function getnfeProc(result: any) {
-  const Id = result['nfeProc']['NFe'][0]['infNFe'][0]['$']['Id'];
+  const Id = result['nfeProc']?.['NFe']?.[0]?.['infNFe']?.[0]?.['$']?.['Id'];
+  if (!Id) return null;
   const emit: emit = result['nfeProc']['NFe'][0]['infNFe'][0]['emit'][0];
   const dest: dest = result['nfeProc']['NFe'][0]['infNFe'][0]['dest'][0];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
