@@ -75,7 +75,8 @@ async function bootstrap() {
       .replace(/_6_/g, '.xml:  ' + replyMessages[6])
       .replace(/_7_/g, '.xml:  ' + replyMessages[7])
       .replace(/_8_/g, '.xml:  ' + replyMessages[8])
-      .replace(/_9_/g, replyMessages[9]);
+      .replace(/_9_/g, replyMessages[9])
+      .replace(/_10_/g, '.xml:  ' + replyMessages[10]);
     return reply.type('text/html').send(
       getHtml(`
       <strong>${text}</strong>
@@ -123,7 +124,10 @@ async function bootstrap() {
                   const valorUnitario = parseFloat(det.prod.vUnCom);
                   const valorTotal = parseFloat(det.prod.vProd);
                   const quantidade = det.prod.uCom == 'KG' ? parseFloat(det.prod.qCom) * 1000 : 0;
-                  if (quantidade === 0) {
+                  
+                  if (tipoMaterial === 'outros') {
+                    messages += xmlFile.filename.substring(0, 5) + '_10_';
+                  } else if (quantidade === 0) {
                     messages += xmlFile.filename.substring(0, 5) + '_2_';
                   } else {
                     url = `https://www.app.mundorecicladores.com.br/newRouter3/${codigoNota}/${situacaoNota}/${notaNomeArquivo}/${notaUrl}/${vendedorId}/${codigoBarras}/${dataEmissao}/${tipoMaterial}/${valorUnitario}/${valorTotal}/${quantidade}`;

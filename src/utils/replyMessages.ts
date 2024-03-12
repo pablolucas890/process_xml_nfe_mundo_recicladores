@@ -8,5 +8,6 @@ const replyMessages = {
   7: 'Erro ao processar a nota, verifique se a nota já não foi submetida<br>',
   8: 'Nota submetida com sucesso<br>',
   9: 'Selecione no máximo 10 arquivos<br>',
+  10: 'Material inválido, selecione uma nota com material válido<br>',
 };
 export default replyMessages;
