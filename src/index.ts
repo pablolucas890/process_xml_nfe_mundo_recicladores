@@ -25,10 +25,6 @@ const certificate = fs.readFileSync('src/credentials/certificate.crt', 'utf8');
 const caBundle = fs.readFileSync('src/credentials/ca-bundle.crt', 'utf8');
 
 // utils
-function getBrasilianDate(date: string) {
-  return date.substring(8, 10) + '%2F' + date.substring(5, 7) + '%2F' + date.substring(0, 4);
-}
-
 function getMaterial(product: string) {
   return (
     materials[Object.keys(materials).find((key: string) => product.includes(key)) as keyof typeof materials] || 'outros'
@@ -119,7 +115,8 @@ async function bootstrap() {
                   const notaUrl = PROTOCOL + '%3A%2F%2F' + DNS + ':' + PORT + '%2F' + xmlFile.path.replace('/', '%2F');
                   const vendedorId = idVendedor;
                   const codigoBarras = nfeProc.protNFe.infProt.chNFe;
-                  const dataEmissao = getBrasilianDate(nfeProc.protNFe.infProt.dhRecbto);
+                  const dataEmissaoDate = new Date(nfeProc.protNFe.infProt.dhRecbto);
+                  const dataEmissao = dataEmissaoDate.toISOString().substring(0, 10);
                   const tipoMaterial = getMaterial(det.prod.xProd.toLowerCase());
                   const valorUnitario = parseFloat(det.prod.vUnCom);
                   const valorTotal = parseFloat(det.prod.vProd);
