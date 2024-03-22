@@ -75,8 +75,8 @@ async function bootstrap() {
       .replace(/_10_/g, '.xml:  ' + replyMessages[10]);
     return reply.type('text/html').send(
       getHtml(`
-      <strong>${text}</strong>
-      <a href="/${idVendedor}">OK</a>
+      <strong style="font-size: 9px;">${text}</strong>
+      <a href="/${idVendedor}" style="position: absolute; top: 0; right: 0;">OK</a>
     `),
     );
   });
