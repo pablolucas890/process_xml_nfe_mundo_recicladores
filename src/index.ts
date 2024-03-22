@@ -109,7 +109,7 @@ async function bootstrap() {
                   messages += xmlFile.filename.substring(0, 5) + '_3_';
                 } else {
                   const det = nfeProc.nfe.infNFe.det[0];
-                  const codigoNota = nfeProc.nfe.infNFe.Id;
+                  const codigoNota = nfeProc.nfe.infNFe.Id.replace('NFe', '');
                   const situacaoNota = 'em-analise';
                   const notaNomeArquivo = xmlFile.originalname;
                   const notaUrl = PROTOCOL + '%3A%2F%2F' + DNS + ':' + PORT + '%2F' + xmlFile.path.replace('/', '%2F');
