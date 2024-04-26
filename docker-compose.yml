@@ -1,0 +1,10 @@
+version: "3"
+services:
+  api:
+    container_name: api
+    image: pabloamoradev/api_mr_xml:latest
+    network_mode: host
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /home/ubuntu/process_xml_nfe_mundo_recicladores/uploads:/app/uploads
