@@ -52,7 +52,7 @@ async function bootstrap() {
         <label class="upload-button">
           <input type="hidden" name="idVendedor" value="${idVendedor}">
           <input type="file" onchange="enviarFormulario()" name="files" accept="text/xml" multiple>
-          <p>Enviar XML</p>
+          <p>Selecionar Notas (*max 10)</p>
         </label>
         <input type="submit" value="Enviar" id="submit">
       </form>
@@ -61,7 +61,8 @@ async function bootstrap() {
   });
 
   app.get('/result/:idVendedor/:message', async (request, reply) => {
-    const { idVendedor, message } = request.params as { idVendedor: string; message: string };
+    const { message } = request.params as { idVendedor: string; message: string };
+    console.log('message', message);
     const text = message
       .replace(/_1_/g, '.xml:  ' + replyMessages[1])
       .replace(/_2_/g, '.xml:  ' + replyMessages[2])
@@ -75,8 +76,7 @@ async function bootstrap() {
       .replace(/_10_/g, '.xml:  ' + replyMessages[10]);
     return reply.type('text/html').send(
       getHtml(`
-      <strong style="font-size: 9px;">${text}</strong>
-      <a href="/${idVendedor}" style="position: absolute; top: 0; right: 0;">OK</a>
+      <strong style="font-size: 14px;">${text}</strong>
     `),
     );
   });
@@ -147,7 +147,7 @@ async function bootstrap() {
             }
           }
         } catch (error) {
-          messages += '_5_';
+          messages += 'File_5_';
         }
       }
       return reply.redirect('/result/' + idVendedor + '/' + messages);

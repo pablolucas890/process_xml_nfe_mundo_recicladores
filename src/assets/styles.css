@@ -3,20 +3,23 @@ body{
   padding: 0;
   display: flex;
   overflow: hidden; /* Para esconder barras de rolagem verticais */
+  font-family: "Poppins", sans-serif;
 }
 form {
   display: flex;
   width: 100%;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 input[type="file"] {
   display: none;
 }
 .upload-button {
   justify-content: center;
-  background-color: #40AC6B;
+  background-color: #165A6D;
   color: #fff;
-  width: auto;
+  width: 90%;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -45,7 +48,6 @@ a{
   padding: 4px;
 }
 strong{
-  font-family: Helvetica,Arial,sans-serif;
   font-size: 13px;
-  color: #40AC6B;
+  color: black;
 }
