@@ -46,6 +46,12 @@ async function bootstrap() {
 
   app.get('/:idVendedor', async (request: FastifyRequest, reply) => {
     const { idVendedor } = request.params as { idVendedor: string };
+    if (!idVendedor || idVendedor?.length < 36) 
+      return reply.type('text/html').send(
+        getHtml(`
+        <h1 style="color: red;"> Erro: ID do vendedor não informado </h1>
+      `),
+      );
     return reply.type('text/html').send(
       getHtml(`
       <form action="/upload" method="post" id="form" enctype="multipart/form-data">
